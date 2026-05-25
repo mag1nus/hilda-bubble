@@ -20,3 +20,5 @@ Read `CLAUDE.md` before making changes. Keep `tasks/todo.md` updated while worki
 
 ## Target Deliverable
 This project produces a standalone HTML file with a data tab and an R circlepackeR-style graph, styled from Region Norrbotten's identity. The graph hierarchy is `cluster -> competence -> names`, with dynamic circles, click-to-zoom, PNG export, and traffic-light coloring: `<2` red, `2` orange, `>2` green. Cluster `0` renders as zoomable free competence circles without a parent cluster. Use `data/testdata.csv` as semicolon-separated starter data; rows have `competence`, `name`, and `cluster` fields. Keep it portable and backend-free.
+
+@CLAUDE.md
