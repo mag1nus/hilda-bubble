@@ -18,6 +18,8 @@
 - [x] Enable zoom on free cluster `0` competence circles.
 - [x] Export current graph view as PNG.
 - [x] Preserve SVG colors in exported PNG.
+- [x] Size competence circles from measured label content rather than a character-count heuristic.
+- [x] Dynamically scale competence text and circles so each circle fills more of its available outer space.
 
 ## Review
 
@@ -41,3 +43,5 @@
 - Softened the traffic-light competence circle colors.
 - Added graph PNG export for the current SVG view.
 - Inlined computed SVG styles during PNG export so CSS-driven colors are preserved.
+- Replaced the competence-circle radius heuristic with a text-measurement-based layout so circles scale from actual label widths and line counts.
+- Added iterative text fitting so competence labels and circle radii scale together instead of staying at fixed font sizes.

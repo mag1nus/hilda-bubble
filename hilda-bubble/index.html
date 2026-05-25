@@ -463,6 +463,17 @@ APA;Test;1</script>
   <script>
     const headers = ["competence", "name", "cluster"];
     const palette = ["#00abe1", "#141f69", "#5ec5e8", "#7a8bd6", "#0088b8", "#4d5aa8"];
+    const competenceTitleBaseSize = 14;
+    const competenceNameBaseSize = 12;
+    const competenceTitleMinSize = 12;
+    const competenceTitleMaxSize = 20;
+    const competenceNameMinSize = 10;
+    const competenceNameMaxSize = 18;
+    const competenceBlockGap = 4;
+    const competencePadding = 16;
+    const measureCanvas = document.createElement("canvas");
+    const measureContext = measureCanvas.getContext("2d");
+    const textWidthCache = new Map();
     let rows = parseCsv(document.getElementById("seed-data").textContent.trim());
     let fileHandle = null;
 
@@ -504,6 +515,12 @@ APA;Test;1</script>
     });
 
     render();
+    if (document.fonts && typeof document.fonts.ready?.then === "function") {
+      document.fonts.ready.then(() => {
+        textWidthCache.clear();
+        renderGraph();
+      });
+    }
 
     function activatePanel(name) {
       document.querySelectorAll(".tab").forEach((tab) => {
@@ -582,9 +599,9 @@ APA;Test;1</script>
         <g${free ? ` class="pack-free-competence${zoomedFreeCompetence === competence.name ? " is-zoomed" : ""}" data-free-competence="${escapeHtml(competence.name)}" tabindex="0" role="button" aria-label="Zoom ${escapeHtml(competence.name)}"` : ""}>
           <circle class="pack-competence" cx="${competence.x}" cy="${competence.y}" r="${competence.r}" fill="${competence.fill}"></circle>
           <title>${escapeHtml(competence.name)} - ${escapeHtml(competence.names.join(", "))}</title>
-          <text class="pack-label pack-competence-name" x="${competence.x}" y="${competence.titleY}" text-anchor="middle">${escapeHtml(fitLabel(competence.name, competence.r))}</text>
+          <text class="pack-label pack-competence-name" x="${competence.x}" y="${competence.titleY}" text-anchor="middle" font-size="${competence.titleFontSize}">${escapeHtml(fitLabel(competence.name, competence.r))}</text>
           ${competence.nameLines.map((line) => `
-            <text class="pack-label pack-person-name" x="${competence.x}" y="${line.y}" text-anchor="middle">${escapeHtml(line.text)}</text>
+            <text class="pack-label pack-person-name" x="${competence.x}" y="${line.y}" text-anchor="middle" font-size="${competence.personFontSize}">${escapeHtml(line.text)}</text>
           `).join("")}
         </g>
       `;
@@ -644,11 +661,11 @@ APA;Test;1</script>
 
     function setGraphView(cluster, root) {
       if (!cluster) {
-        const size = (root.r + 36) * 2;
+        const size = (root.r + 24) * 2;
         graphEl.setAttribute("viewBox", `${root.x - size / 2} ${root.y - size / 2} ${size} ${size}`);
         return;
       }
-      const padding = Math.max(24, cluster.r * 0.18);
+      const padding = Math.max(18, cluster.r * 0.12);
       const size = (cluster.r + padding) * 2;
       graphEl.setAttribute("viewBox", `${cluster.x - size / 2} ${cluster.y - size / 2} ${size} ${size}`);
     }
@@ -684,10 +701,10 @@ APA;Test;1</script>
           group.competences.map((competence) => ({
             name: competence.name,
             names: competence.names,
-            r: competenceRadius(competence),
+            ...measureCompetenceLayout(competence),
             fill: trafficLightColor(competence.names.length),
           })),
-          { gap: 14, padding: 44 }
+          { gap: 12, padding: 34 }
         );
 
         return {
@@ -700,12 +717,12 @@ APA;Test;1</script>
       const freeModels = (freeGroup ? freeGroup.competences : []).map((competence) => ({
         name: competence.name,
         names: competence.names,
-        r: competenceRadius(competence),
+        ...measureCompetenceLayout(competence),
         fill: trafficLightColor(competence.names.length),
         free: true,
       }));
 
-      const packedClusters = packCircularItems([...clusterModels, ...freeModels], { gap: 30, padding: 56 });
+      const packedClusters = packCircularItems([...clusterModels, ...freeModels], { gap: 24, padding: 44 });
       const root = { ...center, r: Math.max(312, packedClusters.r) };
       const clusters = packedClusters.items.filter((item) => !item.free).map((cluster) => {
         const x = root.x + cluster.dx;
@@ -734,14 +751,6 @@ APA;Test;1</script>
       });
 
       return { root, clusters, freeCompetences };
-    }
-
-    function competenceRadius(competence) {
-      const lines = [competence.name, ...competence.names];
-      const longest = Math.max(...lines.map((line) => line.length));
-      const textWidth = longest * 7.4;
-      const textHeight = 18 + competence.names.length * 14;
-      return Math.ceil(Math.hypot(textWidth / 2, textHeight / 2) + 18);
     }
 
     function trafficLightColor(count) {
@@ -811,18 +820,85 @@ APA;Test;1</script>
 
     function buildCompetenceText(circle, x, y) {
       const lineTexts = circle.names;
-      const start = y + 8 - ((lineTexts.length - 1) * 14) / 2;
+      const blockHeight = circle.titleLineHeight + competenceBlockGap + lineTexts.length * circle.personLineHeight;
+      const titleY = y - blockHeight / 2 + circle.titleLineHeight * 0.82;
+      const start = titleY + competenceBlockGap + circle.personLineHeight * 0.5;
       return {
-        titleY: start - 15,
+        titleY,
         nameLines: lineTexts.map((name, index) => ({
           text: name,
-          y: start + index * 14,
+          y: start + index * circle.personLineHeight,
         })),
       };
     }
 
     function fitLabel(value, radius) {
       return String(value || "");
+    }
+
+    function measureCompetenceLayout(competence) {
+      let titleFontSize = competenceTitleBaseSize;
+      let personFontSize = competenceNameBaseSize;
+      let radius = 0;
+      let titleLineHeight = Math.round(titleFontSize * 1.15);
+      let personLineHeight = Math.round(personFontSize * 1.22);
+
+      for (let pass = 0; pass < 3; pass += 1) {
+        const titleFont = `800 ${titleFontSize}px "Source Sans Pro", "Source Sans 3", "Segoe UI", sans-serif`;
+        const personFont = `${personFontSize}px "Source Sans Pro", "Source Sans 3", "Segoe UI", sans-serif`;
+        const titleWidth = measureTextWidth(competence.name, titleFont);
+        const personWidths = competence.names.map((name) => measureTextWidth(name, personFont));
+        const maxWidth = Math.max(titleWidth, ...personWidths, 0);
+        titleLineHeight = Math.round(titleFontSize * 1.15);
+        personLineHeight = Math.round(personFontSize * 1.22);
+        const textHeight = titleLineHeight + competenceBlockGap + competence.names.length * personLineHeight;
+        radius = Math.hypot(maxWidth / 2, textHeight / 2) + competencePadding;
+
+        const sizeBoost = clamp(0.95 + radius / 240, 1, 1.35);
+        const nextTitleFontSize = clamp(competenceTitleBaseSize * sizeBoost, competenceTitleMinSize, competenceTitleMaxSize);
+        const nextPersonFontSize = clamp(competenceNameBaseSize * sizeBoost, competenceNameMinSize, competenceNameMaxSize);
+        if (
+          Math.abs(nextTitleFontSize - titleFontSize) < 0.1 &&
+          Math.abs(nextPersonFontSize - personFontSize) < 0.1
+        ) {
+          break;
+        }
+        titleFontSize = nextTitleFontSize;
+        personFontSize = nextPersonFontSize;
+      }
+
+      const finalTitleFont = `800 ${titleFontSize}px "Source Sans Pro", "Source Sans 3", "Segoe UI", sans-serif`;
+      const finalPersonFont = `${personFontSize}px "Source Sans Pro", "Source Sans 3", "Segoe UI", sans-serif`;
+      const finalTitleWidth = measureTextWidth(competence.name, finalTitleFont);
+      const finalPersonWidths = competence.names.map((name) => measureTextWidth(name, finalPersonFont));
+      const finalMaxWidth = Math.max(finalTitleWidth, ...finalPersonWidths, 0);
+      titleLineHeight = Math.round(titleFontSize * 1.15);
+      personLineHeight = Math.round(personFontSize * 1.22);
+      const finalTextHeight = titleLineHeight + competenceBlockGap + competence.names.length * personLineHeight;
+      radius = Math.hypot(finalMaxWidth / 2, finalTextHeight / 2) + competencePadding;
+
+      return {
+        r: radius,
+        radius,
+        titleFontSize,
+        personFontSize,
+        titleLineHeight,
+        personLineHeight,
+      };
+    }
+
+    function measureTextWidth(text, font) {
+      const key = `${font}|${text}`;
+      if (textWidthCache.has(key)) return textWidthCache.get(key);
+      if (!measureContext) return text.length * 7;
+      measureContext.font = font;
+      const width = measureContext.measureText(text).width;
+      textWidthCache.set(key, width);
+      return width;
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
     }
 
     async function openCsvFile() {

@@ -13,3 +13,4 @@
 - Store starter data as semicolon-separated CSV, not TSV.
 - Use fictional person names in the `name` column for test data, not duplicated competence labels.
 - Follow the repo's local instructions first, then keep task tracking lightweight and explicit.
+- When changing pack layout helpers, keep the property names that downstream packers expect (`r`, not just `radius`) or the graph can render blank from NaN coordinates.
