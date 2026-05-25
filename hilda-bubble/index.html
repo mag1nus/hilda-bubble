@@ -1,0 +1,1039 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kompetenskarta</title>
+  <style>
+    :root {
+      --brand-blue: #141f69;
+      --brand-cyan: #00abe1;
+      --brand-sky: #d7f2fb;
+      --brand-ice: #f4fbfe;
+      --ink: #141f30;
+      --paper: #eef7fb;
+      --panel: #ffffff;
+      --line: #141f69;
+      --muted: #586377;
+      --accent: #00abe1;
+      --accent-dark: #007ca8;
+      --warning: #ffe2b8;
+      --danger: #b00020;
+      --traffic-red: #f2a6a6;
+      --traffic-orange: #ffd88a;
+      --traffic-green: #a9d9b2;
+      --shadow: 0 20px 45px rgba(20, 31, 105, 0.13);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(20, 31, 105, 0.08) 0 24%, transparent 24% 100%),
+        linear-gradient(180deg, #ffffff 0%, var(--paper) 54%, #ffffff 100%),
+        var(--paper);
+      font-family: "Source Sans Pro", "Source Sans 3", "Segoe UI", Frutiger, sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .shell {
+      width: min(1220px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: end;
+      padding: 24px 0 22px;
+      border-bottom: 6px solid var(--brand-cyan);
+    }
+
+    header::before {
+      content: "Region Norrbotten";
+      grid-column: 1 / -1;
+      width: fit-content;
+      padding: 6px 12px;
+      background: var(--brand-blue);
+      color: white;
+      font-size: 0.94rem;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 780px;
+      color: var(--brand-blue);
+      font-size: clamp(2.1rem, 5vw, 4.6rem);
+      line-height: 1;
+      font-weight: 800;
+    }
+
+    .status {
+      min-width: min(360px, 100%);
+      max-width: 420px;
+      padding: 12px 14px;
+      border: 2px solid var(--brand-blue);
+      background: var(--panel);
+      box-shadow: inset 8px 0 0 var(--brand-cyan);
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 22px 0;
+    }
+
+    .tab {
+      border: 2px solid var(--brand-blue);
+      background: var(--panel);
+      color: var(--brand-blue);
+      min-height: 42px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: none;
+    }
+
+    .tab[aria-selected="true"] {
+      background: var(--brand-blue);
+      color: white;
+      box-shadow: inset 0 -4px 0 var(--brand-cyan);
+    }
+
+    main {
+      border: 2px solid rgba(20, 31, 105, 0.18);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      display: none;
+      min-height: 640px;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .graph-wrap {
+      position: relative;
+      min-height: 640px;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(20, 31, 105, 0.04) 1px, transparent 1px),
+        linear-gradient(rgba(20, 31, 105, 0.04) 1px, transparent 1px),
+        var(--brand-ice);
+      background-size: 32px 32px;
+    }
+
+    .graph-tools {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px;
+      background: var(--brand-ice);
+      border-bottom: 2px solid rgba(20, 31, 105, 0.18);
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      min-height: 640px;
+    }
+
+    .pack-root {
+      fill: rgba(215, 242, 251, 0.52);
+      stroke: var(--brand-blue);
+      stroke-width: 2;
+      stroke-dasharray: 8 7;
+      cursor: zoom-out;
+    }
+
+    .pack-cluster-group,
+    .pack-free-competence {
+      cursor: zoom-in;
+    }
+
+    .pack-cluster {
+      stroke: var(--brand-blue);
+      stroke-width: 2.5;
+      fill-opacity: 0.22;
+    }
+
+    .pack-cluster-group:hover .pack-cluster,
+    .pack-cluster-group:focus .pack-cluster {
+      fill-opacity: 0.36;
+      stroke-width: 3.4;
+    }
+
+    .pack-cluster-group.is-zoomed {
+      cursor: zoom-out;
+    }
+
+    .pack-cluster-group.is-zoomed .pack-cluster {
+      fill-opacity: 0.4;
+      stroke-width: 3.4;
+    }
+
+    .pack-competence {
+      stroke: var(--brand-blue);
+      stroke-width: 1.8;
+    }
+
+    .pack-free-competence .pack-competence {
+      stroke-width: 2.2;
+    }
+
+    .pack-free-competence:hover .pack-competence,
+    .pack-free-competence:focus .pack-competence,
+    .pack-free-competence.is-zoomed .pack-competence {
+      stroke-width: 3.4;
+    }
+
+    .pack-label {
+      fill: var(--ink);
+      font-size: 14px;
+      paint-order: stroke;
+      stroke: white;
+      stroke-width: 5px;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+
+    .pack-cluster-label {
+      font-size: 18px;
+      font-weight: 800;
+      fill: var(--brand-blue);
+    }
+
+    .pack-competence-name {
+      font-weight: 800;
+    }
+
+    .pack-person-name {
+      fill: var(--muted);
+      font-size: 12px;
+    }
+
+    .data-tools {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: start;
+      padding: 18px;
+      border-bottom: 2px solid rgba(20, 31, 105, 0.18);
+      background: var(--brand-ice);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(130px, 1fr)) auto;
+      gap: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 5px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    input {
+      width: 100%;
+      min-height: 42px;
+      padding: 8px 10px;
+      border: 2px solid rgba(20, 31, 105, 0.32);
+      background: white;
+      color: var(--ink);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      min-height: 42px;
+      border: 2px solid var(--brand-blue);
+      background: white;
+      color: var(--brand-blue);
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: none;
+    }
+
+    .btn.primary {
+      background: var(--brand-blue);
+      color: white;
+    }
+
+    .btn.danger {
+      background: #fff;
+      color: var(--danger);
+      box-shadow: none;
+    }
+
+    .btn:focus,
+    .tab:focus,
+    input:focus {
+      outline: 3px solid var(--brand-cyan);
+      outline-offset: 2px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      max-height: 570px;
+    }
+
+    table {
+      width: 100%;
+      min-width: 820px;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(47, 52, 55, 0.24);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: var(--brand-blue);
+      color: white;
+      font-size: 0.84rem;
+      text-transform: uppercase;
+    }
+
+    td input {
+      min-height: 36px;
+      border-width: 1px;
+      background: white;
+    }
+
+    .row-index {
+      width: 58px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .empty {
+      padding: 48px 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 820px) {
+      header,
+      .data-tools,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .shell {
+        width: min(100% - 20px, 1220px);
+        padding-top: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <h1>Kompetenskarta</h1>
+      <p class="status" id="status">Loaded embedded starter data. Save writes semicolon CSV to a file when the browser allows it.</p>
+    </header>
+
+    <nav class="tabs" aria-label="Views">
+      <button class="tab" type="button" aria-selected="true" data-panel="graph">Graph</button>
+      <button class="tab" type="button" aria-selected="false" data-panel="data">Data</button>
+    </nav>
+
+    <main>
+      <section class="panel active" id="graph-panel" aria-label="Circle packing graph view">
+        <div class="graph-tools">
+          <button class="btn primary" type="button" id="save-graph-png">Save PNG</button>
+        </div>
+        <div class="graph-wrap">
+          <svg id="graph" viewBox="0 0 1180 660" role="img" aria-label="circlepackeR-style cluster to competence to names hierarchy"></svg>
+        </div>
+      </section>
+
+      <section class="panel" id="data-panel" aria-label="Data view">
+        <div class="data-tools">
+          <form class="form-grid" id="add-form">
+            <div class="field">
+              <label for="competence">Competence</label>
+              <input id="competence" name="competence" autocomplete="off" required>
+            </div>
+            <div class="field">
+              <label for="name">Name</label>
+              <input id="name" name="name" autocomplete="off" required>
+            </div>
+            <div class="field">
+              <label for="cluster">Cluster</label>
+              <input id="cluster" name="cluster" autocomplete="off" required>
+            </div>
+            <button class="btn primary" type="submit">Add Row</button>
+          </form>
+          <div class="actions">
+            <button class="btn" type="button" id="open-file">Open CSV</button>
+            <button class="btn primary" type="button" id="save-file">Save CSV</button>
+            <button class="btn" type="button" id="download-file">Download CSV</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Competence</th>
+                <th>Name</th>
+                <th>Cluster</th>
+                <th>Remove</th>
+              </tr>
+            </thead>
+            <tbody id="data-body"></tbody>
+          </table>
+          <div class="empty" id="empty-state" hidden>No rows yet.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="text/csv" id="seed-data">competence;name;cluster
+BHV;Alva Lindgren;0
+BST;Noah Berg;0
+akutpediatrik;Maja Holm;0
+CS;Elias Nordin;Neurologi
+neurologi;Sara Ekström;Neurologi
+neuro;Viktor Dahl;Neurologi
+CF/lung;Linnea Sjöberg;Neurologi
+akut;Oskar Wallin;Neurologi
+allergi;Freja Nyström;Neurologi
+obesitas;Isak Lund;Gastro/Nutrition
+gastro/hep/nutr;Elin Falk;Gastro/Nutrition
+ätstörning;Hanna Vik;Gastro/Nutrition
+diabetes;Leo Sandberg;Endokrin/Metabol
+endokrin;Nora Blom;Endokrin/Metabol
+cardio;Anton Frisk;0
+onk/hem;Klara Westin;0
+smärta;Malte Roos;0
+infektion;Ida Gran;0
+reuma;Emil Ström;0
+nefro;Tuva Hall;0
+APA;Magnus;1
+APA;Hilda;1
+APA;Test;1</script>
+
+  <script>
+    const headers = ["competence", "name", "cluster"];
+    const palette = ["#00abe1", "#141f69", "#5ec5e8", "#7a8bd6", "#0088b8", "#4d5aa8"];
+    let rows = parseCsv(document.getElementById("seed-data").textContent.trim());
+    let fileHandle = null;
+
+    const statusEl = document.getElementById("status");
+    const bodyEl = document.getElementById("data-body");
+    const emptyEl = document.getElementById("empty-state");
+    const graphEl = document.getElementById("graph");
+    let zoomedCluster = null;
+    let zoomedFreeCompetence = null;
+
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.panel));
+    });
+
+    document.getElementById("add-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const form = new FormData(event.currentTarget);
+      rows.push({
+        competence: form.get("competence").trim(),
+        name: form.get("name").trim(),
+        cluster: form.get("cluster").trim(),
+      });
+      event.currentTarget.reset();
+      render();
+      setStatus("Row added. Save the CSV to persist the change.");
+    });
+
+    document.getElementById("open-file").addEventListener("click", openCsvFile);
+    document.getElementById("save-file").addEventListener("click", saveCsvFile);
+    document.getElementById("download-file").addEventListener("click", downloadCsvFile);
+    document.getElementById("save-graph-png").addEventListener("click", saveGraphPng);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && (zoomedCluster || zoomedFreeCompetence)) {
+        zoomedCluster = null;
+        zoomedFreeCompetence = null;
+        renderGraph();
+        setStatus("Showing all clusters.");
+      }
+    });
+
+    render();
+
+    function activatePanel(name) {
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.setAttribute("aria-selected", String(tab.dataset.panel === name));
+      });
+      document.querySelectorAll(".panel").forEach((panel) => panel.classList.remove("active"));
+      document.getElementById(`${name}-panel`).classList.add("active");
+    }
+
+    function render() {
+      renderTable();
+      renderGraph();
+    }
+
+    function renderTable() {
+      emptyEl.hidden = rows.length > 0;
+      bodyEl.innerHTML = rows.map((row, index) => `
+        <tr>
+          <td class="row-index">${index + 1}</td>
+          <td><input aria-label="Competence row ${index + 1}" data-field="competence" data-index="${index}" value="${escapeHtml(row.competence)}"></td>
+          <td><input aria-label="Name row ${index + 1}" data-field="name" data-index="${index}" value="${escapeHtml(row.name)}"></td>
+          <td><input aria-label="Cluster row ${index + 1}" data-field="cluster" data-index="${index}" value="${escapeHtml(row.cluster)}"></td>
+          <td><button class="btn danger" type="button" data-remove="${index}">Remove</button></td>
+        </tr>
+      `).join("");
+
+      bodyEl.querySelectorAll("input").forEach((input) => {
+        input.addEventListener("input", (event) => {
+          const target = event.currentTarget;
+          rows[Number(target.dataset.index)][target.dataset.field] = target.value;
+          renderGraph();
+          setStatus("Data changed. Save the CSV to persist the edit.");
+        });
+      });
+
+      bodyEl.querySelectorAll("[data-remove]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          rows.splice(Number(event.currentTarget.dataset.remove), 1);
+          render();
+          setStatus("Row removed. Save the CSV to persist the change.");
+        });
+      });
+    }
+
+    function renderGraph() {
+      const groups = groupRows(rows);
+      if (groups.length === 0) {
+        graphEl.innerHTML = "";
+        graphEl.setAttribute("viewBox", "0 0 1180 660");
+        return;
+      }
+
+      const pack = layoutCirclePack(groups);
+      const activeCluster = pack.clusters.find((cluster) => cluster.name === zoomedCluster);
+      const activeFreeCompetence = pack.freeCompetences.find((competence) => competence.name === zoomedFreeCompetence);
+      if (zoomedCluster && !activeCluster) zoomedCluster = null;
+      if (zoomedFreeCompetence && !activeFreeCompetence) zoomedFreeCompetence = null;
+      setGraphView(activeCluster || activeFreeCompetence || null, pack.root);
+
+      graphEl.innerHTML = `
+        <circle class="pack-root" cx="${pack.root.x}" cy="${pack.root.y}" r="${pack.root.r}" tabindex="0" role="button" aria-label="Show all clusters"></circle>
+        ${pack.clusters.map((cluster) => `
+          <g class="pack-cluster-group${zoomedCluster === cluster.name ? " is-zoomed" : ""}" data-cluster="${escapeHtml(cluster.name)}" tabindex="0" role="button" aria-label="Zoom ${escapeHtml(cluster.name)}">
+            <circle class="pack-cluster" cx="${cluster.x}" cy="${cluster.y}" r="${cluster.r}" fill="${cluster.color}"></circle>
+            ${cluster.competences.map((competence) => renderCompetenceCircle(competence)).join("")}
+            <text class="pack-label pack-cluster-label" x="${cluster.x}" y="${cluster.y + cluster.r - 16}" text-anchor="middle">${escapeHtml(cluster.name)}</text>
+          </g>
+        `).join("")}
+        ${pack.freeCompetences.map((competence) => renderCompetenceCircle(competence, true)).join("")}
+      `;
+      bindGraphZoomControls();
+    }
+
+    function renderCompetenceCircle(competence, free = false) {
+      return `
+        <g${free ? ` class="pack-free-competence${zoomedFreeCompetence === competence.name ? " is-zoomed" : ""}" data-free-competence="${escapeHtml(competence.name)}" tabindex="0" role="button" aria-label="Zoom ${escapeHtml(competence.name)}"` : ""}>
+          <circle class="pack-competence" cx="${competence.x}" cy="${competence.y}" r="${competence.r}" fill="${competence.fill}"></circle>
+          <title>${escapeHtml(competence.name)} - ${escapeHtml(competence.names.join(", "))}</title>
+          <text class="pack-label pack-competence-name" x="${competence.x}" y="${competence.titleY}" text-anchor="middle">${escapeHtml(fitLabel(competence.name, competence.r))}</text>
+          ${competence.nameLines.map((line) => `
+            <text class="pack-label pack-person-name" x="${competence.x}" y="${line.y}" text-anchor="middle">${escapeHtml(line.text)}</text>
+          `).join("")}
+        </g>
+      `;
+    }
+
+    function bindGraphZoomControls() {
+      graphEl.querySelector(".pack-root").addEventListener("click", resetGraphZoom);
+      graphEl.querySelector(".pack-root").addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          resetGraphZoom();
+        }
+      });
+
+      graphEl.querySelectorAll(".pack-cluster-group").forEach((group) => {
+        group.addEventListener("click", () => toggleClusterZoom(group.dataset.cluster));
+        group.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            toggleClusterZoom(group.dataset.cluster);
+          }
+        });
+      });
+
+      graphEl.querySelectorAll(".pack-free-competence").forEach((group) => {
+        group.addEventListener("click", () => toggleFreeCompetenceZoom(group.dataset.freeCompetence));
+        group.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            toggleFreeCompetenceZoom(group.dataset.freeCompetence);
+          }
+        });
+      });
+    }
+
+    function toggleClusterZoom(clusterName) {
+      zoomedCluster = zoomedCluster === clusterName ? null : clusterName;
+      zoomedFreeCompetence = null;
+      renderGraph();
+      setStatus(zoomedCluster ? `Zoomed into ${zoomedCluster}.` : "Showing all clusters.");
+    }
+
+    function toggleFreeCompetenceZoom(competenceName) {
+      zoomedFreeCompetence = zoomedFreeCompetence === competenceName ? null : competenceName;
+      zoomedCluster = null;
+      renderGraph();
+      setStatus(zoomedFreeCompetence ? `Zoomed into ${zoomedFreeCompetence}.` : "Showing all clusters.");
+    }
+
+    function resetGraphZoom() {
+      if (!zoomedCluster && !zoomedFreeCompetence) return;
+      zoomedCluster = null;
+      zoomedFreeCompetence = null;
+      renderGraph();
+      setStatus("Showing all clusters.");
+    }
+
+    function setGraphView(cluster, root) {
+      if (!cluster) {
+        const size = (root.r + 36) * 2;
+        graphEl.setAttribute("viewBox", `${root.x - size / 2} ${root.y - size / 2} ${size} ${size}`);
+        return;
+      }
+      const padding = Math.max(24, cluster.r * 0.18);
+      const size = (cluster.r + padding) * 2;
+      graphEl.setAttribute("viewBox", `${cluster.x - size / 2} ${cluster.y - size / 2} ${size} ${size}`);
+    }
+
+    function groupRows(data) {
+      const map = new Map();
+      data.forEach((row) => {
+        const cluster = row.cluster.trim();
+        const competence = row.competence.trim();
+        const name = row.name.trim();
+        if (!cluster || !competence || !name) return;
+        if (!map.has(cluster)) map.set(cluster, new Map());
+        const competences = map.get(cluster);
+        if (!competences.has(competence)) competences.set(competence, []);
+        competences.get(competence).push(name);
+      });
+      return [...map.entries()].map(([name, competences]) => ({
+        name,
+        competences: [...competences.entries()].map(([competence, names]) => ({
+          name: competence,
+          names,
+        })),
+      }));
+    }
+
+    function layoutCirclePack(groups) {
+      const center = { x: 590, y: 330 };
+      const freeGroup = groups.find((group) => group.name === "0");
+      const clusterGroups = groups.filter((group) => group.name !== "0");
+      const clusterModels = clusterGroups.map((group, index) => {
+        const color = palette[index % palette.length];
+        const packedCompetences = packCircularItems(
+          group.competences.map((competence) => ({
+            name: competence.name,
+            names: competence.names,
+            r: competenceRadius(competence),
+            fill: trafficLightColor(competence.names.length),
+          })),
+          { gap: 14, padding: 44 }
+        );
+
+        return {
+          name: group.name,
+          color,
+          r: packedCompetences.r,
+          packedCompetences: packedCompetences.items,
+        };
+      });
+      const freeModels = (freeGroup ? freeGroup.competences : []).map((competence) => ({
+        name: competence.name,
+        names: competence.names,
+        r: competenceRadius(competence),
+        fill: trafficLightColor(competence.names.length),
+        free: true,
+      }));
+
+      const packedClusters = packCircularItems([...clusterModels, ...freeModels], { gap: 30, padding: 56 });
+      const root = { ...center, r: Math.max(312, packedClusters.r) };
+      const clusters = packedClusters.items.filter((item) => !item.free).map((cluster) => {
+        const x = root.x + cluster.dx;
+        const y = root.y + cluster.dy;
+        return {
+          ...cluster,
+          x,
+          y,
+          competences: cluster.packedCompetences.map((competence) => ({
+            ...competence,
+            x: x + competence.dx,
+            y: y + competence.dy,
+            ...buildCompetenceText(competence, x + competence.dx, y + competence.dy),
+          })),
+        };
+      });
+      const freeCompetences = packedClusters.items.filter((item) => item.free).map((competence) => {
+        const x = root.x + competence.dx;
+        const y = root.y + competence.dy;
+        return {
+          ...competence,
+          x,
+          y,
+          ...buildCompetenceText(competence, x, y),
+        };
+      });
+
+      return { root, clusters, freeCompetences };
+    }
+
+    function competenceRadius(competence) {
+      const lines = [competence.name, ...competence.names];
+      const longest = Math.max(...lines.map((line) => line.length));
+      const textWidth = longest * 7.4;
+      const textHeight = 18 + competence.names.length * 14;
+      return Math.ceil(Math.hypot(textWidth / 2, textHeight / 2) + 18);
+    }
+
+    function trafficLightColor(count) {
+      if (count < 2) return "var(--traffic-red)";
+      if (count === 2) return "var(--traffic-orange)";
+      return "var(--traffic-green)";
+    }
+
+    function packCircularItems(items, options = {}) {
+      const gap = options.gap || 12;
+      const padding = options.padding || 32;
+      if (items.length === 0) return { r: padding, items: [] };
+      if (items.length === 1) {
+        const [item] = items;
+        return { r: item.r + padding, items: [{ ...item, dx: 0, dy: -padding * 0.08 }] };
+      }
+
+      const sorted = [...items].sort((a, b) => b.r - a.r);
+      const centerItem = sorted.length % 2 === 1 ? sorted.shift() : null;
+      const positioned = [];
+      let outer = 0;
+
+      if (centerItem) {
+        positioned.push({ ...centerItem, dx: 0, dy: -padding * 0.08 });
+        outer = centerItem.r;
+      }
+
+      const ringSizes = buildRingSizes(sorted.length);
+      let cursor = 0;
+      let previousRing = centerItem ? { radius: 0, maxR: centerItem.r } : null;
+
+      ringSizes.forEach((count, ringIndex) => {
+        const ringItems = sorted.slice(cursor, cursor + count);
+        cursor += count;
+        const maxR = Math.max(...ringItems.map((item) => item.r));
+        const chordRadius = count <= 1 ? 0 : ((maxR * 2 + gap) / (2 * Math.sin(Math.PI / count)));
+        const radialRadius = previousRing ? previousRing.radius + previousRing.maxR + maxR + gap : 0;
+        const radius = Math.max(chordRadius, radialRadius);
+        const startAngle = -Math.PI / 2 + ringIndex * 0.23;
+
+        ringItems.forEach((item, index) => {
+          const angle = startAngle + (index / count) * Math.PI * 2;
+          const dx = Math.cos(angle) * radius;
+          const dy = Math.sin(angle) * radius;
+          positioned.push({ ...item, dx, dy });
+          outer = Math.max(outer, Math.hypot(dx, dy) + item.r);
+        });
+
+        previousRing = { radius, maxR };
+      });
+
+      return { r: outer + padding, items: positioned };
+    }
+
+    function buildRingSizes(total) {
+      const sizes = [];
+      let remaining = total;
+      let capacity = 7;
+      while (remaining > 0) {
+        const count = Math.min(remaining, capacity);
+        sizes.push(count);
+        remaining -= count;
+        capacity += 6;
+      }
+      return sizes;
+    }
+
+    function buildCompetenceText(circle, x, y) {
+      const lineTexts = circle.names;
+      const start = y + 8 - ((lineTexts.length - 1) * 14) / 2;
+      return {
+        titleY: start - 15,
+        nameLines: lineTexts.map((name, index) => ({
+          text: name,
+          y: start + index * 14,
+        })),
+      };
+    }
+
+    function fitLabel(value, radius) {
+      return String(value || "");
+    }
+
+    async function openCsvFile() {
+      if (!window.showOpenFilePicker) {
+        setStatus("Open CSV requires a browser with File System Access support. Use the embedded data or download workflow.");
+        return;
+      }
+      try {
+        [fileHandle] = await window.showOpenFilePicker({
+          types: [{ description: "Semicolon CSV", accept: { "text/csv": [".csv"] } }],
+          multiple: false,
+        });
+        const file = await fileHandle.getFile();
+        rows = parseCsv(await file.text());
+        render();
+        setStatus(`Loaded ${file.name}. Edits can be saved back to the selected file.`);
+      } catch (error) {
+        if (error.name !== "AbortError") setStatus(`Could not open CSV: ${error.message}`);
+      }
+    }
+
+    async function saveCsvFile() {
+      const csv = serializeCsv(rows);
+      if (!window.showSaveFilePicker && !fileHandle) {
+        downloadCsvFile();
+        return;
+      }
+
+      try {
+        if (!fileHandle) {
+          fileHandle = await window.showSaveFilePicker({
+            suggestedName: "testdata.csv",
+            types: [{ description: "Semicolon CSV", accept: { "text/csv": [".csv"] } }],
+          });
+        }
+        const writable = await fileHandle.createWritable();
+        await writable.write(csv);
+        await writable.close();
+        setStatus("Saved semicolon CSV to file.");
+      } catch (error) {
+        if (error.name !== "AbortError") setStatus(`Could not save CSV: ${error.message}`);
+      }
+    }
+
+    function downloadCsvFile() {
+      const blob = new Blob([serializeCsv(rows)], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "testdata.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+      setStatus("Downloaded semicolon CSV file.");
+    }
+
+    async function saveGraphPng() {
+      const svgText = serializeGraphSvg();
+      const blob = new Blob([svgText], { type: "image/svg+xml;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const image = new Image();
+
+      try {
+        await new Promise((resolve, reject) => {
+          image.onload = resolve;
+          image.onerror = reject;
+          image.src = url;
+        });
+
+        const canvas = document.createElement("canvas");
+        canvas.width = 1800;
+        canvas.height = 1200;
+        const context = canvas.getContext("2d");
+        context.fillStyle = "#f4fbfe";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((pngBlob) => {
+          if (!pngBlob) {
+            setStatus("Could not create PNG.");
+            return;
+          }
+          const pngUrl = URL.createObjectURL(pngBlob);
+          const link = document.createElement("a");
+          link.href = pngUrl;
+          link.download = "kompetenskarta.png";
+          link.click();
+          URL.revokeObjectURL(pngUrl);
+          setStatus("Downloaded graph as PNG.");
+        }, "image/png");
+      } catch (error) {
+        setStatus(`Could not save PNG: ${error.message || "image export failed"}`);
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    function serializeGraphSvg() {
+      const clone = graphEl.cloneNode(true);
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      clone.setAttribute("width", "1800");
+      clone.setAttribute("height", "1200");
+      inlineSvgStyles(graphEl, clone);
+      clone.insertAdjacentHTML("afterbegin", `
+        <style>
+          .pack-root { fill: rgba(215, 242, 251, 0.52); stroke: #141f69; stroke-width: 2; stroke-dasharray: 8 7; }
+          .pack-cluster { stroke: #141f69; stroke-width: 2.5; fill-opacity: 0.22; }
+          .pack-competence { stroke: #141f69; stroke-width: 1.8; }
+          .pack-free-competence .pack-competence { stroke-width: 2.2; }
+          .pack-label { fill: #141f30; font: 14px "Source Sans Pro", "Segoe UI", sans-serif; paint-order: stroke; stroke: white; stroke-width: 5px; stroke-linejoin: round; }
+          .pack-cluster-label { fill: #141f69; font-weight: 800; font-size: 18px; }
+          .pack-competence-name { font-weight: 800; }
+          .pack-person-name { fill: #586377; font-size: 12px; }
+        </style>
+        <rect x="-10000" y="-10000" width="20000" height="20000" fill="#f4fbfe"></rect>
+      `);
+      return new XMLSerializer().serializeToString(clone);
+    }
+
+    function inlineSvgStyles(source, clone) {
+      const sourceNodes = [source, ...source.querySelectorAll("*")];
+      const cloneNodes = [clone, ...clone.querySelectorAll("*")];
+      const properties = [
+        ["fill", "fill"],
+        ["stroke", "stroke"],
+        ["strokeWidth", "stroke-width"],
+        ["fillOpacity", "fill-opacity"],
+        ["strokeOpacity", "stroke-opacity"],
+        ["fontSize", "font-size"],
+        ["fontWeight", "font-weight"],
+        ["fontFamily", "font-family"],
+      ];
+      sourceNodes.forEach((node, index) => {
+        const target = cloneNodes[index];
+        if (!target) return;
+        const style = getComputedStyle(node);
+        properties.forEach(([property, attribute]) => {
+          const value = style[property];
+          if (value && value !== "none" && value !== "normal") {
+            target.setAttribute(attribute, value);
+          }
+        });
+      });
+    }
+
+    function parseCsv(text) {
+      const records = parseRecords(text.trim(), ";").filter((record) => record.some(Boolean));
+      const [head, ...body] = records;
+      const index = Object.fromEntries(head.map((name, position) => [name.trim(), position]));
+      return body.map((record) => ({
+        competence: record[index.competence] || "",
+        name: record[index.name] || "",
+        cluster: record[index.cluster] || "",
+      }));
+    }
+
+    function parseRecords(text, delimiter) {
+      const records = [];
+      let record = [];
+      let field = "";
+      let quoted = false;
+
+      for (let index = 0; index < text.length; index += 1) {
+        const char = text[index];
+        const next = text[index + 1];
+
+        if (char === '"' && quoted && next === '"') {
+          field += '"';
+          index += 1;
+        } else if (char === '"') {
+          quoted = !quoted;
+        } else if (char === delimiter && !quoted) {
+          record.push(field);
+          field = "";
+        } else if ((char === "\n" || char === "\r") && !quoted) {
+          if (char === "\r" && next === "\n") index += 1;
+          record.push(field);
+          records.push(record);
+          record = [];
+          field = "";
+        } else {
+          field += char;
+        }
+      }
+
+      record.push(field);
+      records.push(record);
+      return records;
+    }
+
+    function serializeCsv(data) {
+      return [
+        headers.join(";"),
+        ...data.map((row) => headers.map((field) => encodeField(row[field])).join(";")),
+      ].join("\n") + "\n";
+    }
+
+    function encodeField(value) {
+      const text = String(value || "");
+      return /[";\n\r]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function setStatus(message) {
+      statusEl.textContent = message;
+    }
+  </script>
+</body>
+</html>
