@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kompetenskarta</title>
-  <link rel="icon" href="data:,">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23141f69'/%3E%3Ccircle cx='24' cy='24' r='13' fill='%23d7f2fb' stroke='%2300abe1' stroke-width='4'/%3E%3Ccircle cx='42' cy='38' r='16' fill='%23ffffff' stroke='%2300abe1' stroke-width='4'/%3E%3Ccircle cx='42' cy='38' r='7' fill='%23abd9b8'/%3E%3Cpath d='M14 50h36' stroke='%2300abe1' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
   <style>
     :root {
       --brand-blue: #141f69;
@@ -46,7 +46,7 @@
 
     button,
     input,
-    textarea {
+    input {
       font: inherit;
     }
 
@@ -153,7 +153,8 @@
 
     .graph-wrap {
       position: relative;
-      min-height: 690px;
+      height: clamp(760px, 92vw, 1320px);
+      min-height: 760px;
       overflow: hidden;
       background:
         radial-gradient(circle at 50% 48%, rgba(0, 171, 225, 0.09), transparent 37%),
@@ -207,7 +208,8 @@
     svg {
       display: block;
       width: 100%;
-      min-height: 690px;
+      height: 100%;
+      min-height: 560px;
     }
 
     .pack-root {
@@ -275,30 +277,12 @@
 
     .data-tools {
       display: grid;
-      grid-template-columns: minmax(320px, 0.9fr) minmax(420px, 1.1fr);
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 16px;
       align-items: start;
       padding: 18px;
       border-bottom: 1px solid rgba(20, 31, 105, 0.14);
       background: var(--brand-mist);
-    }
-
-    .csv-panel {
-      display: grid;
-      gap: 10px;
-    }
-
-    .csv-editor {
-      width: 100%;
-      min-height: 230px;
-      resize: vertical;
-      padding: 12px;
-      border: 2px solid rgba(20, 31, 105, 0.28);
-      background: #fff;
-      color: var(--ink);
-      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
-      font-size: 0.88rem;
-      line-height: 1.45;
     }
 
     .form-grid {
@@ -335,6 +319,11 @@
       justify-content: flex-start;
     }
 
+    .file-actions {
+      justify-content: flex-end;
+      max-width: 620px;
+    }
+
     .btn {
       min-height: 42px;
       border: 2px solid var(--brand-blue);
@@ -365,8 +354,7 @@
 
     .btn:focus,
     .tab:focus,
-    input:focus,
-    textarea:focus {
+    input:focus {
       outline: 3px solid var(--brand-cyan);
       outline-offset: 2px;
     }
@@ -439,6 +427,10 @@
         justify-content: flex-start;
       }
 
+      .file-actions {
+        max-width: none;
+      }
+
       .shell {
         width: min(100% - 20px, 1220px);
         padding-top: 14px;
@@ -446,7 +438,8 @@
 
       svg,
       .graph-wrap {
-        min-height: 560px;
+        height: clamp(620px, 118vw, 880px);
+        min-height: 620px;
       }
     }
   </style>
@@ -455,8 +448,8 @@
   <div class="shell">
     <header>
       <h1>Kompetenskarta</h1>
-      <p class="subtitle">Grouped by cluster, competence, and name</p>
-      <p class="status" id="status">Loaded embedded starter data. Paste CSV, upload a file, or edit rows in the data tab.</p>
+      <p class="subtitle">Grupperad efter kluster, kompetens och namn</p>
+      <p class="status" id="status">Loaded embedded starter data. Upload a file or edit rows in the data tab.</p>
     </header>
 
     <nav class="tabs" aria-label="Views">
@@ -484,17 +477,6 @@
 
       <section class="panel" id="data-panel" aria-label="Data view">
         <div class="data-tools">
-          <div class="csv-panel">
-            <label for="csv-editor">CSV input</label>
-            <textarea class="csv-editor" id="csv-editor" spellcheck="false"></textarea>
-            <div class="actions">
-              <button class="btn primary" type="button" id="render-csv">Render CSV</button>
-              <input class="file-input" id="csv-file" type="file" accept=".csv,text/csv,text/plain">
-              <button class="btn" type="button" id="open-file">Open CSV</button>
-              <button class="btn primary" type="button" id="save-file">Save CSV</button>
-              <button class="btn" type="button" id="download-file">Download CSV</button>
-            </div>
-          </div>
           <form class="form-grid" id="add-form">
             <div class="field">
               <label for="competence">Competence</label>
@@ -510,6 +492,12 @@
             </div>
             <button class="btn primary" type="submit">Add Row</button>
           </form>
+          <div class="actions file-actions">
+            <input class="file-input" id="csv-file" type="file" accept=".csv,text/csv,text/plain">
+            <button class="btn" type="button" id="open-file">Open CSV</button>
+            <button class="btn primary" type="button" id="save-file">Save CSV</button>
+            <button class="btn" type="button" id="download-file">Download CSV</button>
+          </div>
         </div>
 
         <div class="table-wrap">
@@ -532,9 +520,9 @@
   </div>
 
   <script type="text/csv" id="seed-data">competence;name;cluster
-BHV;Alva Lindgren;0
-BST;Noah Berg;0
-akutpediatrik;Maja Holm;0
+BHV;Alva Lindgren;BHV
+BST;Noah Berg;BST
+akutpediatrik;Maja Holm;akutpediatrik
 CS;Elias Nordin;Neurologi
 neurologi;Sara Ekström;Neurologi
 neuro;Viktor Dahl;Neurologi
@@ -546,12 +534,12 @@ gastro/hep/nutr;Elin Falk;Gastro/Nutrition
 ätstörning;Hanna Vik;Gastro/Nutrition
 diabetes;Leo Sandberg;Endokrin/Metabol
 endokrin;Nora Blom;Endokrin/Metabol
-cardio;Anton Frisk;0
-onk/hem;Klara Westin;0
-smärta;Malte Roos;0
-infektion;Ida Gran;0
-reuma;Emil Ström;0
-nefro;Tuva Hall;0
+cardio;Anton Frisk;cardio
+onk/hem;Klara Westin;onk/hem
+smärta;Malte Roos;smärta
+infektion;Ida Gran;infektion
+reuma;Emil Ström;reuma
+nefro;Tuva Hall;nefro
 APA;Magnus;1
 APA;Hilda;1
 APA;Test;1</script>
@@ -567,39 +555,42 @@ APA;Test;1</script>
       { fill: "#ccfbf1", stroke: "#367266" },
       { fill: "#fee2e2", stroke: "#8d4b4b" },
     ];
-    const competenceTitleBaseSize = 28;
-    const competenceNameBaseSize = 24;
+    const competenceTitleBaseSize = 34;
+    const competenceNameBaseSize = 28;
     const competenceTitleMinSize = 24;
-    const competenceTitleMaxSize = 40;
+    const competenceTitleMaxSize = 54;
     const competenceNameMinSize = 20;
-    const competenceNameMaxSize = 36;
-    const competenceBlockGap = 16;
-    const competencePadding = 104;
-    const competenceTextSafety = 1.42;
-    const competenceLabelStrokePadding = 24;
-    const competenceExtraNamePadding = 44;
-    const graphViewBoxWidth = 1180;
-    const graphViewBoxHeight = 660;
-    const graphCenter = { x: graphViewBoxWidth / 2, y: graphViewBoxHeight / 2 };
+    const competenceNameMaxSize = 46;
+    const competenceBlockGap = 8;
+    const competencePadding = 3;
+    const competenceTextSafety = 1.01;
+    const competenceLabelStrokePadding = 3;
+    const competenceExtraNamePadding = 4;
+    const graphDefaultWidth = 1180;
+    const graphDefaultHeight = 660;
+    const graphMinWidth = 720;
+    const graphMinHeight = 520;
     const graphRootPadding = 4;
     const graphFocusPadding = 6;
-    const graphTargetRadius = Math.min(graphViewBoxWidth, graphViewBoxHeight) / 2 - graphRootPadding;
-    const clusterLabelReserve = 220;
-    const clusterLabelTopPadding = 28;
-    const clusterLabelBaseSize = 16;
+    const clusterLabelReserve = 32;
+    const clusterLabelTopPadding = 18;
+    const clusterLabelBaseSize = 14;
+    const storageKey = "kompetenskarta.csv.v1";
+    const cookieKey = "kompetenskartaCsvV1";
     const measureCanvas = document.createElement("canvas");
     const measureContext = measureCanvas.getContext("2d");
     const textMeasureCache = new Map();
-    let rows = parseCsv(document.getElementById("seed-data").textContent.trim());
+    let rows = loadInitialRows();
     let fileHandle = null;
 
     const statusEl = document.getElementById("status");
     const bodyEl = document.getElementById("data-body");
     const emptyEl = document.getElementById("empty-state");
     const graphEl = document.getElementById("graph");
-    const csvTextEl = document.getElementById("csv-editor");
     const csvFileEl = document.getElementById("csv-file");
     let zoomedCluster = null;
+    let graphSize = { width: graphDefaultWidth, height: graphDefaultHeight };
+    let resizeRenderFrame = null;
 
     document.querySelectorAll(".tab").forEach((tab) => {
       tab.addEventListener("click", () => activatePanel(tab.dataset.panel));
@@ -614,12 +605,11 @@ APA;Test;1</script>
         cluster: form.get("cluster").trim(),
       });
       event.currentTarget.reset();
-      syncCsvTextarea();
+      persistRows();
       render();
       setStatus("Row added. Save the CSV to persist the change.");
     });
 
-    document.getElementById("render-csv").addEventListener("click", renderCsvFromTextarea);
     csvFileEl.addEventListener("change", loadCsvFromFileInput);
     document.getElementById("open-file").addEventListener("click", openCsvFile);
     document.getElementById("save-file").addEventListener("click", saveCsvFile);
@@ -634,7 +624,6 @@ APA;Test;1</script>
       }
     });
 
-    syncCsvTextarea();
     render();
     if (document.fonts && typeof document.fonts.ready?.then === "function") {
       document.fonts.ready.then(() => {
@@ -642,6 +631,7 @@ APA;Test;1</script>
         renderGraph();
       });
     }
+    observeGraphResize();
 
     function activatePanel(name) {
       document.querySelectorAll(".tab").forEach((tab) => {
@@ -649,6 +639,7 @@ APA;Test;1</script>
       });
       document.querySelectorAll(".panel").forEach((panel) => panel.classList.remove("active"));
       document.getElementById(`${name}-panel`).classList.add("active");
+      if (name === "graph") scheduleGraphResize();
     }
 
     function render() {
@@ -672,42 +663,97 @@ APA;Test;1</script>
         input.addEventListener("input", (event) => {
           const target = event.currentTarget;
           rows[Number(target.dataset.index)][target.dataset.field] = target.value;
-          syncCsvTextarea();
+          persistRows();
           renderGraph();
-          setStatus("Data changed. Save the CSV to persist the edit.");
+          setStatus("Data changed. Browser state saved.");
         });
       });
 
       bodyEl.querySelectorAll("[data-remove]").forEach((button) => {
         button.addEventListener("click", (event) => {
           rows.splice(Number(event.currentTarget.dataset.remove), 1);
-          syncCsvTextarea();
+          persistRows();
           render();
-          setStatus("Row removed. Save the CSV to persist the change.");
+          setStatus("Row removed. Browser state saved.");
         });
       });
     }
 
-    function syncCsvTextarea() {
-      csvTextEl.value = serializeCsv(rows).trimEnd();
+    function loadInitialRows() {
+      const seedCsv = document.getElementById("seed-data").textContent.trim();
+      try {
+        const savedCsv = localStorage.getItem(storageKey) || readCookie(cookieKey);
+        if (savedCsv?.trim()) return parseCsv(savedCsv);
+      } catch (error) {
+        console.warn("Could not load browser state.", error);
+      }
+      return parseCsv(seedCsv);
     }
 
-    function renderCsvFromTextarea() {
+    function persistRows() {
       try {
-        rows = parseCsv(csvTextEl.value);
-        zoomedCluster = null;
-        render();
-        setStatus(`Rendered ${rows.length} CSV rows.`);
+        const csv = serializeCsv(rows);
+        localStorage.setItem(storageKey, csv);
+        writeCookie(cookieKey, csv);
       } catch (error) {
-        setStatus(`CSV validation error: ${error.message}`);
+        console.warn("Could not save browser state.", error);
       }
     }
 
+    function readCookie(name) {
+      const prefix = `${encodeURIComponent(name)}=`;
+      const match = document.cookie
+        .split(";")
+        .map((part) => part.trim())
+        .find((part) => part.startsWith(prefix));
+      return match ? decodeURIComponent(match.slice(prefix.length)) : "";
+    }
+
+    function writeCookie(name, value) {
+      document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; max-age=31536000; path=/; SameSite=Lax`;
+    }
+
+    function observeGraphResize() {
+      if (!window.ResizeObserver) {
+        window.addEventListener("resize", scheduleGraphResize);
+        return;
+      }
+
+      const observer = new ResizeObserver(scheduleGraphResize);
+      observer.observe(graphEl);
+    }
+
+    function scheduleGraphResize() {
+      if (resizeRenderFrame !== null) cancelAnimationFrame(resizeRenderFrame);
+      resizeRenderFrame = requestAnimationFrame(() => {
+        resizeRenderFrame = null;
+        const nextSize = readGraphSize();
+        if (
+          Math.abs(nextSize.width - graphSize.width) < 2 &&
+          Math.abs(nextSize.height - graphSize.height) < 2
+        ) {
+          return;
+        }
+        graphSize = nextSize;
+        textMeasureCache.clear();
+        renderGraph();
+      });
+    }
+
+    function readGraphSize() {
+      const rect = graphEl.getBoundingClientRect();
+      return {
+        width: Math.max(graphMinWidth, Math.round(rect.width || graphEl.clientWidth || graphDefaultWidth)),
+        height: Math.max(graphMinHeight, Math.round(rect.height || graphEl.clientHeight || graphDefaultHeight)),
+      };
+    }
+
     function renderGraph() {
+      graphSize = readGraphSize();
       const groups = groupRows(rows);
       if (groups.length === 0) {
         graphEl.innerHTML = "";
-        graphEl.setAttribute("viewBox", `0 0 ${graphViewBoxWidth} ${graphViewBoxHeight}`);
+        graphEl.setAttribute("viewBox", `0 0 ${graphSize.width} ${graphSize.height}`);
         return;
       }
 
@@ -723,7 +769,7 @@ APA;Test;1</script>
             <title>${escapeHtml(clusterTooltip(cluster))}</title>
             <circle class="pack-cluster" cx="${cluster.x}" cy="${cluster.y}" r="${cluster.r}" fill="${cluster.color.fill}" stroke="${cluster.color.stroke}"></circle>
             ${cluster.competences.map((competence) => renderCompetenceCircle(competence)).join("")}
-            <text class="pack-label pack-cluster-label" x="${cluster.x}" y="${cluster.y - cluster.r + clusterLabelTopPadding}" text-anchor="middle" font-size="${clamp(cluster.r / 11, clusterLabelBaseSize, 20)}">${escapeHtml(cluster.name)}</text>
+            <text class="pack-label pack-cluster-label" x="${cluster.x}" y="${cluster.y - cluster.r + clusterLabelTopPadding}" text-anchor="middle" font-size="${clamp(cluster.r / 10, clusterLabelBaseSize, 24)}">${escapeHtml(cluster.name)}</text>
           </g>
         `).join("")}
       `;
@@ -799,13 +845,13 @@ APA;Test;1</script>
 
     function setGraphView(cluster, root) {
       if (!cluster) {
-        const size = (root.r + graphRootPadding) * 2;
-        graphEl.setAttribute("viewBox", `${root.x - size / 2} ${root.y - size / 2} ${size} ${size}`);
+        graphEl.setAttribute("viewBox", `0 0 ${graphSize.width} ${graphSize.height}`);
         return;
       }
       const padding = Math.max(graphFocusPadding, cluster.r * 0.04);
-      const size = (cluster.r + padding) * 2;
-      graphEl.setAttribute("viewBox", `${cluster.x - size / 2} ${cluster.y - size / 2} ${size} ${size}`);
+      const width = Math.min(graphSize.width, (cluster.r + padding) * 2);
+      const height = Math.min(graphSize.height, (cluster.r + padding) * 2);
+      graphEl.setAttribute("viewBox", `${cluster.x - width / 2} ${cluster.y - height / 2} ${width} ${height}`);
     }
 
     function groupRows(data) {
@@ -839,7 +885,11 @@ APA;Test;1</script>
     }
 
     function layoutCirclePack(groups) {
-      const center = graphCenter;
+      const center = { x: graphSize.width / 2, y: graphSize.height / 2 };
+      const graphTargetRadius = Math.max(
+        120,
+        Math.min(graphSize.width, graphSize.height) / 2 - graphRootPadding
+      );
       const clusterModels = groups.map((group, index) => {
         const color = palette[index % palette.length];
         const packedCompetences = packCircularItems(
@@ -850,7 +900,7 @@ APA;Test;1</script>
             ...measureCompetenceLayout(competence),
             fill: trafficLightColor(competence.names.length),
           })),
-          { gap: 8, padding: 24 }
+          { gap: 4, padding: 8 }
         );
 
         return {
@@ -864,7 +914,7 @@ APA;Test;1</script>
         };
       });
 
-      const packedClusters = packCircularItems(clusterModels, { gap: 16, padding: 28 });
+      const packedClusters = packCircularItems(clusterModels, { gap: 5, padding: 10 });
       const scaleBase = packedClusters.contentR || packedClusters.r;
       const scale = scaleBase > 0 ? graphTargetRadius / scaleBase : 1;
       const scaledPackedClusters = scalePackedItems(packedClusters, scale);
@@ -1145,10 +1195,10 @@ APA;Test;1</script>
         });
         const file = await fileHandle.getFile();
         rows = parseCsv(await file.text());
-        syncCsvTextarea();
+        persistRows();
         zoomedCluster = null;
         render();
-        setStatus(`Loaded ${file.name}. Edits can be saved back to the selected file.`);
+        setStatus(`Loaded ${file.name}. Browser state saved; edits can also be saved back to the selected file.`);
       } catch (error) {
         if (error.name !== "AbortError") setStatus(`Could not open CSV: ${error.message}`);
       }
@@ -1160,10 +1210,10 @@ APA;Test;1</script>
 
       try {
         rows = parseCsv(await file.text());
-        syncCsvTextarea();
+        persistRows();
         zoomedCluster = null;
         render();
-        setStatus(`Loaded ${file.name}.`);
+        setStatus(`Loaded ${file.name}. Browser state saved.`);
       } catch (error) {
         setStatus(`CSV validation error: ${error.message}`);
       } finally {
