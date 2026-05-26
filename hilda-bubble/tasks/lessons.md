@@ -14,3 +14,9 @@
 - Use fictional person names in the `name` column for test data, not duplicated competence labels.
 - Follow the repo's local instructions first, then keep task tracking lightweight and explicit.
 - When changing pack layout helpers, keep the property names that downstream packers expect (`r`, not just `radius`) or the graph can render blank from NaN coordinates.
+- When competence text feels cramped, increase the ring radius itself with a measured safety factor and padding; spacing tweaks alone are not enough.
+- The SVG text stroke counts toward the visual footprint, so include outline padding when sizing competence circles.
+- If the user asks to enlarge circles, do not reduce the font sizes; grow the ring budget and internal gaps instead.
+- Cluster labels need reserved footer space; otherwise single-competence clusters can draw their cluster label over the competence text.
+- Do not define fixed CSS font sizes for measured SVG labels; CSS overrides presentation attributes and invalidates text-fit calculations.
+- When graph label sizes change, update competence metrics, stroke padding, extra-name padding, and cluster-label reserve together.

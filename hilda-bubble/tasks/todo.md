@@ -20,6 +20,14 @@
 - [x] Preserve SVG colors in exported PNG.
 - [x] Size competence circles from measured label content rather than a character-count heuristic.
 - [x] Dynamically scale competence text and circles so each circle fills more of its available outer space.
+- [x] Keep all text inside competence circles without overlap.
+- [x] Size competence rings from the full text block so labels and names fit with breathing room.
+- [x] Enlarge competence rings further so the title and names are clearly contained.
+- [x] Account for text stroke width when sizing competence rings.
+- [x] Enlarge competence circles without shrinking the text.
+- [x] Reserve cluster-label space so APA and other single-competence clusters do not overlap text.
+- [x] Make rendered SVG text use measured font sizes so APA layout math matches the visible text.
+- [x] Double graph text sizes and enlarge rings/reserved spaces accordingly.
 
 ## Review
 
@@ -45,3 +53,15 @@
 - Inlined computed SVG styles during PNG export so CSS-driven colors are preserved.
 - Replaced the competence-circle radius heuristic with a text-measurement-based layout so circles scale from actual label widths and line counts.
 - Added iterative text fitting so competence labels and circle radii scale together instead of staying at fixed font sizes.
+- [x] Scale the root pack so cluster and cluster `0` rings use the full available outer radius.
+- [x] Make competence circles as large as possible within the available packing space.
+- Scaled the root pack against the true outer content radius so the outermost cluster and free-competence rings now reach the available edge of the graph.
+- Tightened competence and cluster packing spacing so the rendered competence circles occupy more of the available layout area.
+- Replaced estimated text line heights with metric-based row sizing so competence titles and person names stay inside each circle without colliding.
+- Added extra radius safety margin and row spacing so competence rings have room for both the title and the names.
+- Increased the circle radius safety factor and padding so the rings visibly grow instead of just reshuffling text.
+- Added explicit padding for the stroked SVG labels so the visible text no longer hugs or escapes the circle edge.
+- Raised the ring padding and internal spacing so circle size increases while title and name font sizes stay unchanged.
+- Added a cluster-label footer reserve and extra multi-name circle padding so APA has room for its title, names, and cluster label.
+- Removed fixed SVG label font-size overrides and prevented root-pack downscaling so measured competence text remains inside its circle.
+- Doubled competence title/name text and cluster-label text, then doubled related padding, stroke allowance, extra-name padding, and cluster footer reserve.
