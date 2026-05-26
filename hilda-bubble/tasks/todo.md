@@ -1,67 +1,15 @@
 # Todo
 
-- [x] Confirm the repository structure and local instructions are in place.
-- [x] Create the initial task-tracking scaffold for future work.
-- [x] Verify the resulting files and working tree state.
-- [x] Create standalone `index.html` with graph and data tabs.
-- [x] Implement add and remove row controls for semicolon CSV data.
-- [x] Persist edited data to a file using browser file save with a download fallback.
-- [x] Verify CSV parsing and row shape.
-- [x] Replace graph view with a circlepackeR-style circle packing layout.
-- [x] Group graph by `cluster -> competence -> names`.
-- [x] Zoom into a cluster when the cluster is clicked.
-- [x] Prevent circle overlap inside cluster circles by expanding parent circles as needed.
-- [x] Dynamically size competence circles to show all names.
-- [x] Restyle the app using Region Norrbotten visual identity cues.
-- [x] Add traffic-light coloring to competence circles by name count.
-- [x] Render cluster `0` as free competence circles without a parent cluster circle.
-- [x] Enable zoom on free cluster `0` competence circles.
-- [x] Export current graph view as PNG.
-- [x] Preserve SVG colors in exported PNG.
-- [x] Size competence circles from measured label content rather than a character-count heuristic.
-- [x] Dynamically scale competence text and circles so each circle fills more of its available outer space.
-- [x] Keep all text inside competence circles without overlap.
-- [x] Size competence rings from the full text block so labels and names fit with breathing room.
-- [x] Enlarge competence rings further so the title and names are clearly contained.
-- [x] Account for text stroke width when sizing competence rings.
-- [x] Enlarge competence circles without shrinking the text.
-- [x] Reserve cluster-label space so APA and other single-competence clusters do not overlap text.
-- [x] Make rendered SVG text use measured font sizes so APA layout math matches the visible text.
-- [x] Double graph text sizes and enlarge rings/reserved spaces accordingly.
+- [x] Confirm current special handling for cluster `0`.
+- [x] Remove free-competence rendering for cluster `0`.
+- [x] Pack and render cluster `0` as an ordinary cluster with label, zoom, tooltip, and PNG export support.
+- [x] Verify JavaScript parsing and rendered graph counts.
+- [x] Document review notes and verification results below.
 
 ## Review
 
-- Status: initialized
-- Notes: This repo currently contains only local RTK instructions and no application code.
-- Added `data/testdata.csv` as semicolon-separated starter data for the standalone HTML visualization.
-- Added `index.html` with an editable data tab, add/remove row controls, and CSV file save/download persistence.
-- Verified `data/testdata.csv` has 21 valid semicolon-separated lines and `index.html` JavaScript parses successfully.
-- Replaced the graph with a dependency-free circlepackeR-style packed-circle layout and verified the JavaScript syntax.
-- Updated the circlepackeR graph hierarchy to `cluster -> competence -> names`, with names rendered inside competence circles.
-- Added cluster click-to-zoom with root/Escape reset and verified the JavaScript syntax.
-- Reworked packing to prevent competence-circle overlap inside clusters and verified generated SVG circle geometry.
-- Added APA seed rows for Magnus, Hilda, and Test in cluster `1`.
-- Sized competence circles from all rendered text lines so all names are shown without `+N names` summaries.
-- Restyled the app using Region Norrbotten identity cues: Source Sans Pro, primary blue, bright blue accents, and clearer public-sector UI surfaces.
-- Added traffic-light competence coloring: `<2` red, `2` orange, `>2` green.
-- Renamed seed-data cluster `Satellit` to `0`.
-- Rendered cluster `0` as nine free competence circles with no parent cluster circle or zoom target.
-- Enabled click and keyboard zoom on free cluster `0` competence circles.
-- Renamed the app title to `Kompetenskarta`.
-- Softened the traffic-light competence circle colors.
-- Added graph PNG export for the current SVG view.
-- Inlined computed SVG styles during PNG export so CSS-driven colors are preserved.
-- Replaced the competence-circle radius heuristic with a text-measurement-based layout so circles scale from actual label widths and line counts.
-- Added iterative text fitting so competence labels and circle radii scale together instead of staying at fixed font sizes.
-- [x] Scale the root pack so cluster and cluster `0` rings use the full available outer radius.
-- [x] Make competence circles as large as possible within the available packing space.
-- Scaled the root pack against the true outer content radius so the outermost cluster and free-competence rings now reach the available edge of the graph.
-- Tightened competence and cluster packing spacing so the rendered competence circles occupy more of the available layout area.
-- Replaced estimated text line heights with metric-based row sizing so competence titles and person names stay inside each circle without colliding.
-- Added extra radius safety margin and row spacing so competence rings have room for both the title and the names.
-- Increased the circle radius safety factor and padding so the rings visibly grow instead of just reshuffling text.
-- Added explicit padding for the stroked SVG labels so the visible text no longer hugs or escapes the circle edge.
-- Raised the ring padding and internal spacing so circle size increases while title and name font sizes stay unchanged.
-- Added a cluster-label footer reserve and extra multi-name circle padding so APA has room for its title, names, and cluster label.
-- Removed fixed SVG label font-size overrides and prevented root-pack downscaling so measured competence text remains inside its circle.
-- Doubled competence title/name text and cluster-label text, then doubled related padding, stroke allowance, extra-name padding, and cluster footer reserve.
+- Status: complete
+- Removed the special free-competence branch for cluster `0`; all groups now use the same cluster model, render path, tooltip path, and zoom path.
+- Removed free-competence CSS, event handlers, state, status text, and PNG export styling.
+- Verified JavaScript parsing with `rtk node -e ...`.
+- Browser-verified via temporary localhost server and Playwright: seeded graph now renders 5 cluster groups, 0 free-competence groups, 21 competence circles, no console errors, and cluster `0` zoom/reset works through the standard cluster behavior.
